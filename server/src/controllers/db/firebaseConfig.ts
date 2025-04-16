@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { config } from "dotenv";
 config();
 
@@ -12,9 +14,23 @@ export const firebaseConfig = {
   appId: process.env.VITE_FIREBASE_APP_ID,
   measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
 };
-console.log(firebaseConfig);
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
 
-export { db };
+// Connect to emulators in development
+// if (window.location.hostname === "localhost") {
+  if (process.env.NODE_ENV === "development") {
+
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, 'localhost', 8081);
+  connectStorageEmulator(storage, 'localhost', 9199);
+  
+  console.log('Connected to Firebase emulators');
+  console.log('Firestore emulator running on port 8081');
+}
+
+// Export the services for use in other files
+export { app, auth, db, storage };
