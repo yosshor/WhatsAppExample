@@ -1,11 +1,12 @@
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../db/firebaseConfig";
+import { db } from "../../config/firebase";
 
 
 // Get conversation details
 export const getConversation = async (req: any, res: any) => {
     try {
         const { conversationId } = req.params;
+        console.log("conversationId", conversationId);
         const conversationRef = collection(db, 'conversations');
         const q = query(conversationRef, where('id', '==', conversationId));
         

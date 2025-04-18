@@ -1,4 +1,4 @@
-import { db } from '../db/firebaseConfig';
+import { db } from '../../config/firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { User, UserChat } from '../../model/user/user';
 

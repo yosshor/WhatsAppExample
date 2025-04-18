@@ -25,7 +25,7 @@ const storage = getStorage(app);
   if (process.env.NODE_ENV === "development") {
 
   connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, 'localhost', 8081);
+  connectFirestoreEmulator(db, 'localhost', 8082);
   connectStorageEmulator(storage, 'localhost', 9199);
   
   console.log('Connected to Firebase emulators');

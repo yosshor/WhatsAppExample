@@ -1,26 +1,21 @@
 // socketService.ts
 import io from 'socket.io-client';
-import { Platform } from 'react-native';
 
-// Important: Use the appropriate URL based on your setup
-// For Android emulator, use 10.0.2.2 instead of localhost
-// For iOS simulator, you can use localhost
-// For physical devices, use your computer's IP address on the local network
-
-const SOCKET_URL = Platform.OS === 'android'
-    ? 'http://10.0.2.2:3000'  // Android emulator special IP for localhost
-    : 'http://localhost:3000'; // iOS or web
 
 class SocketService {
     socket: any;
+    platform: string;
+    socketUrl: string;
 
-    constructor() {
+    constructor(platform: string) {
         this.socket = null;
+        this.platform = platform;
+        this.socketUrl = this.platform === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
         this.setupSocketConnection();
     }
 
     setupSocketConnection() {
-        this.socket = io(SOCKET_URL, {
+        this.socket = io(this.socketUrl, {
             transports: ['websocket', "polling"],
             reconnection: true,
             reconnectionDelay: 1000,
@@ -76,4 +71,4 @@ class SocketService {
     }
 }
 
-export default new SocketService();
+export default new SocketService('android');

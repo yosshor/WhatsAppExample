@@ -1,11 +1,15 @@
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { addDoc } from "firebase/firestore";
-import { db } from "../db/firebaseConfig";
+import { db } from "../../config/firebase";
 
 // Send a new message
 export const sendMessage = async (req: any, res: any) => {
     try {
         const { text, senderId, receiverId, conversationId } = req.body;
+        console.log("text", text);
+        console.log("senderId", senderId);
+        console.log("receiverId", receiverId);
+        console.log("conversationId", conversationId);
         const messagesRef = collection(db, 'messages');
         
         const newMessage = {

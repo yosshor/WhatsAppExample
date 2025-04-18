@@ -3,8 +3,9 @@ export interface User {
     name: string;
     email: string;
     profileImage?: string;
-    status?: 'online' | 'offline' | 'away';
+    status?: string;
     lastSeen?: Date;
+    profileImagePath?: string;
     bio?: string;
     phoneNumber?: string;
 }
