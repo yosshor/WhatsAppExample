@@ -1,22 +1,33 @@
 import express from "express";
-import { login } from "../../controllers/users/loginUser";
-import { register } from "../../controllers/users/registerUser";
-import { getUserById } from "../../controllers/users/getUser";
-import { deleteUserViaMail } from "../../controllers/users/deleteUser";
-import { updateUserViaMail } from "../../controllers/users/updateUser";
-import { getUsers } from "../../controllers/users/getUsers";
-import { updateUserRole } from "../../controllers/users/updateUserRole";
-import { getUserDataViaCookie } from "../../controllers/users/getUserDataViaCookie";
+import userChatService from "../../controllers/userChatService/userChatService";
 const router = express.Router();
 
 router
-  .post("/login", login)
-  .post("/register", register)
-  .post("/getUser/:id", getUserById)
-  .delete("/deleteUser", deleteUserViaMail)
-  .put("/updateUser", updateUserViaMail)
-  .get("/getUsers", getUsers)
-  .put("/updateUserRole", updateUserRole)
-  .get("/getUserDataFromCookie", getUserDataViaCookie);
+.get("/users/search", async (req, res) => {
+    try {
+        const query = req.query.q as string;
+        if (!query) {
+            return res.json([]);
+        }
+        const users = await userChatService.searchUsers(query);
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: "Failed to search users" });
+    }
+})
+.get("/users/:userId", (req, res) => userChatService.getUser(req.params.userId))
+.put("/updateUserRole/:userId", (req, res) => userChatService.updateUser(req.params.userId, req.body))
+.post("/users/create-test", async (req, res) => {
+    try {
+        console.log("Starting to create test users...");
+        const users = await userChatService.addTestUsers();
+        console.log("Successfully created users:", users);
+        res.json({ message: "Test users created successfully", users });
+    } catch (error) {
+        console.error("Error creating test users:", error);
+        res.status(500).json({ error: "Failed to create test users", 
+            details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
 
 export default router;

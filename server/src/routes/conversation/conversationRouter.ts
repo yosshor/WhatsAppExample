@@ -5,10 +5,10 @@ import { collection, doc, getDoc, query, where, getDocs, addDoc, updateDoc, setD
 const router = express.Router();
 
 // Get conversation by ID
-router.get('/:id', async (req, res) => {
+router.post('/:id', async (req, res) => {
     try {
-        console.log('Getting conversation by ID:', req.params.id);
-        console.log('Database instance:', db);
+        console.log('Getting conversation by ID:', req.params.id, req.params);
+        console.log('req.body',req.body);
         const conversationRef = doc(db, 'conversations', req.params.id);
         const conversationDoc = await getDoc(conversationRef);
 
@@ -45,6 +45,7 @@ router.get('/:id', async (req, res) => {
 // Get all conversations for a user
 router.get('/user/:userId', async (req, res) => {
     try {
+        console.log('Getting all conversations for user:', req.params.userId);
         const conversationsRef = collection(db, 'conversations');
         const q = query(conversationsRef, where('participants', 'array-contains', req.params.userId));
         const querySnapshot = await getDocs(q);
@@ -72,6 +73,7 @@ router.get('/user/:userId', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const { participants, type = 'private' } = req.body;
+        console.log('Creating new conversation:', req.body);
 
         if (!participants || participants.length < 2) {
             return res.status(400).json({ message: 'At least 2 participants required' });

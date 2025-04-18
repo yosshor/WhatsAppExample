@@ -23,7 +23,9 @@ export default function ChatScreen() {
     // Function to fetch messages
     const fetchMessages = async () => {
         try {
-            const response = await fetch(`${API_URL}/messages/${id}`);
+            const url = `${API_URL}/messages/${id}`;
+            console.log('url',url);
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch messages');
             const data = await response.json();
             setMessages(data);
@@ -36,9 +38,27 @@ export default function ChatScreen() {
         const loadChatData = async () => {
             try {
                 // Load conversation details
+                const url = `${API_URL}/conversations/${id}`;
+                const urlMessages = `${API_URL}/messages/${id}`;
+                console.log('url',url);
+                console.log('urlMessages',urlMessages);
                 const [convResponse, messagesResponse] = await Promise.all([
-                    fetch(`${API_URL}/conversations/${id}`),
-                    fetch(`${API_URL}/messages/${id}`)
+                    fetch(url,{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            id: id,
+                            currentUserId: currentUser?.id,
+                            otherUserId: otherUser?.id,
+                            conversationId: id,
+                            messages: messages,
+                            conversation: conversation
+                        })
+                    }),
+                    fetch(urlMessages)
                 ]);
 
                 if (!convResponse.ok || !messagesResponse.ok) {
@@ -54,9 +74,13 @@ export default function ChatScreen() {
                 setMessages(messagesData);
 
                 // Load users
+                const urlUsers = `${API_URL}/users/${convData.currentUserId}`;
+                const urlUsers2 = `${API_URL}/users/${convData.otherUserId}`;
+                console.log('urlUsers',urlUsers);
+                console.log('urlUsers2',urlUsers2);
                 const [currentUserResponse, otherUserResponse] = await Promise.all([
-                    fetch(`${API_URL}/users/${convData.currentUserId}`),
-                    fetch(`${API_URL}/users/${convData.otherUserId}`)
+                    fetch(urlUsers),
+                    fetch(urlUsers2)
                 ]);
 
                 if (!currentUserResponse.ok || !otherUserResponse.ok) {

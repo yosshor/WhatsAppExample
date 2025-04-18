@@ -5,15 +5,21 @@ import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
-import conversationRouter from "./routes/conversation/conversationRouter";
+// import conversationRouter from "./routes/conversation/conversationRouter";
 import messageRouter from "./routes/messages/messageRouter";
 import { db } from "./config/firebase";
+// import userRouter from "./routes/users/usersRouters";
 // import usersRouter from "./routes/users/usersRouters";
 // import flightsRouter from './routes/flights/flightsRouter';
 // import adminRouter from './routes/sysAdmin/adminRouter';
 import chatRoutes from "./routes/chatRoutes";
 // Load environment variables
 config();
+import userRoutes from './routes/users/usersRouters';
+import conversationRoutes from './routes/conversations/conversationRoutes';
+
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,7 +32,8 @@ const io = new Server(httpServer, {
       "http://localhost:5174",
       "http://localhost:5175",
       "http://192.168.33.11:8081",
-      "http://localhost:8081"
+      "http://localhost:8081",
+      "http://192.168.33.14:8081"
     ],
     methods: ["GET", "POST"],
     credentials: true
@@ -42,7 +49,8 @@ app.use(cors({
     "http://localhost:5174",
     "http://localhost:5175",
     "http://192.168.33.11:8081",
-    "http://localhost:8081"
+    "http://localhost:8081",
+    "http://192.168.33.14:8081"
   ],
   credentials: true
 }));
@@ -85,11 +93,16 @@ if (db) {
 }
 
 // API Routes
-const apiRouter = express.Router();
-apiRouter.use("/conversations", conversationRouter);
-apiRouter.use("/messages", messageRouter);
+// const apiRouter = express.Router();
+// apiRouter.use("/conversations", conversationRouter);
+// apiRouter.use("/messages", messageRouter);
+// apiRouter.use("/users", userRouter);
 
-app.use("/api", apiRouter);
+// Routes
+app.use('/api', userRoutes);
+app.use('/api', conversationRoutes);
+
+// app.use("/api", apiRouter);
 
 
 // Routes
