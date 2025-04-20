@@ -104,43 +104,43 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  if (loading) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#128C7E" />
-      </ThemedView>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <ThemedView style={[styles.container, styles.centerContent]}>
+  //       <ActivityIndicator size="large" color="#128C7E" />
+  //     </ThemedView>
+  //   );
+  // }
 
-  if (error) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ThemedText>Error: {error}</ThemedText>
-        <TouchableOpacity onPress={refreshConversations} style={styles.retryButton}>
-          <ThemedText style={styles.retryText}>Retry</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <ThemedView style={[styles.container, styles.centerContent]}>
+  //       <ThemedText>Error: {error}</ThemedText>
+  //       <TouchableOpacity onPress={refreshConversations} style={styles.retryButton}>
+  //         <ThemedText style={styles.retryText}>Retry</ThemedText>
+  //       </TouchableOpacity>
+  //     </ThemedView>
+  //   );
+  // }
 
-  if (usersLoading) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#128C7E" />
-      </ThemedView>
-    );
-  }
+  // if (usersLoading) {
+  //   return (
+  //     <ThemedView style={[styles.container, styles.centerContent]}>
+  //       <ActivityIndicator size="large" color="#128C7E" />
+  //     </ThemedView>
+  //   );
+  // }
 
-  if (usersError) {
-    return (
-      <ThemedView style={[styles.container, styles.centerContent]}>
-        <ThemedText>Error: {usersError}</ThemedText>
-        <TouchableOpacity onPress={refreshUsers} style={styles.retryButton}>
-          <ThemedText style={styles.retryText}>Retry</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    );
-  }
+  // if (usersError) {
+  //   return (
+  //     <ThemedView style={[styles.container, styles.centerContent]}>
+  //       <ThemedText>Error: {usersError}</ThemedText>
+  //       <TouchableOpacity onPress={refreshUsers} style={styles.retryButton}>
+  //         <ThemedText style={styles.retryText}>Retry</ThemedText>
+  //       </TouchableOpacity>
+  //     </ThemedView>
+  //   );
+  // }
 
   return (
     <ThemedView style={styles.container}>
@@ -161,16 +161,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.headerButton}
-            onPress={() => router.push('/new-chat')}
+            
+            onPress={() => router.push('/components/NewChatScreen')}
           >
             <ThemedText style={styles.headerButtonText}>New Chat</ThemedText>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.headerButton}
-            onPress={() => router.push('/menu')}
-          >
-            <ThemedText style={styles.headerButtonText}>Menu</ThemedText>
-          </TouchableOpacity>
+         
         </ThemedView>
       </ThemedView>
 
@@ -185,14 +181,14 @@ export default function HomeScreen() {
         </ThemedView>
       )}
 
-      <FlatList
+      {/* <FlatList
         data={filteredConversations}
         renderItem={renderChatItem}
         keyExtractor={item => item.id}
         ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
         refreshing={loading}
         onRefresh={refreshConversations}
-      />
+      /> */}
 
       <ThemedView style={styles.separator} />
 
@@ -305,7 +301,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: 16,
-    borderBottomWidth: 1,
+    width: '80%',
     borderBottomColor: '#e0e0e0',
   },
   searchInput: {

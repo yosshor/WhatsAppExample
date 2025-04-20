@@ -87,7 +87,7 @@ class UserService {
                 id: 'family1',
                 name: 'Family Group',
                 email: 'family@test.com',
-                profileImage: 'https://via.placeholder.com/150',
+                profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
                 status: 'online',
                 lastSeen: new Date(),
                 phoneNumber: '+1234567890'
@@ -96,7 +96,7 @@ class UserService {
                 id: 'work1',
                 name: 'Work Team',
                 email: 'work@test.com',
-                profileImage: 'https://via.placeholder.com/150',
+                profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
                 status: 'online',
                 lastSeen: new Date(),
                 phoneNumber: '+1234567891'
@@ -105,7 +105,7 @@ class UserService {
                 id: 'mom1',
                 name: 'Mom',
                 email: 'mom@test.com',
-                profileImage: 'https://via.placeholder.com/150',
+                profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
                 status: 'away',
                 lastSeen: new Date(),
                 phoneNumber: '+1234567892'
@@ -114,7 +114,7 @@ class UserService {
                 id: 'dad1',
                 name: 'Dad',
                 email: 'dad@test.com',
-                profileImage: 'https://via.placeholder.com/150',
+                profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
                 status: 'offline',
                 lastSeen: new Date(),
                 phoneNumber: '+1234567893'

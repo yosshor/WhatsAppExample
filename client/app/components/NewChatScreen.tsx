@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useConversations } from '../hooks/useConversations';
+import useConversations  from '../hooks/useConversations';
 import { User } from '../types/user';
 
 // actual user ID from authentication
