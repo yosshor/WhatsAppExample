@@ -3,9 +3,11 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { useConversations } from '../hooks/useConversations';
+import useConversations  from '../hooks/useConversations';
 import { Conversation } from '../types/conversation';
 import { formatDistanceToNow } from 'date-fns';
+import { useUsers } from '@/hooks/useUsers';
+import { User } from '../types/user';
 
 // actual user ID from authentication
 const CURRENT_USER_ID = "YossShor";
@@ -16,10 +18,16 @@ export default function HomeScreen() {
   const [showSearch, setShowSearch] = useState(false);
   
   const { conversations, loading, error, refreshConversations } = useConversations(CURRENT_USER_ID);
+  const { users, loading: usersLoading, error: usersError, refreshUsers, createTestUsers } = useUsers();
 
   const filteredConversations = conversations.filter(chat =>
     chat.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     chat.lastMessage?.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const renderChatItem = ({ item }: { item: Conversation }) => (
@@ -63,6 +71,39 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+  const renderUserItem = ({ item }: { item: User }) => (
+    <TouchableOpacity 
+      style={styles.chatItem}
+      onPress={() => router.push({
+        pathname: '/chat/[id]',
+        params: { id: item.id, name: item.name }
+      })}
+    >
+      <Image 
+        source={{ 
+          uri: item.profileImage || 'https://via.placeholder.com/50'
+        }} 
+        style={styles.avatar} 
+      />
+      <ThemedView style={styles.chatInfo}>
+        <ThemedView style={styles.chatHeader}>
+          <ThemedText style={styles.name}>{item.name}</ThemedText>
+          <ThemedText style={styles.time}>
+            {item.lastSeen ? new Date(item.lastSeen).toLocaleTimeString() : ''}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.messageContainer}>
+          <ThemedText style={styles.lastMessage} numberOfLines={1}>
+            {item.email || 'No email'}
+          </ThemedText>
+          {item.status === 'online' && (
+            <ThemedView style={styles.onlineBadge} />
+          )}
+        </ThemedView>
+      </ThemedView>
+    </TouchableOpacity>
+  );
+
   if (loading) {
     return (
       <ThemedView style={[styles.container, styles.centerContent]}>
@@ -82,6 +123,25 @@ export default function HomeScreen() {
     );
   }
 
+  if (usersLoading) {
+    return (
+      <ThemedView style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#128C7E" />
+      </ThemedView>
+    );
+  }
+
+  if (usersError) {
+    return (
+      <ThemedView style={[styles.container, styles.centerContent]}>
+        <ThemedText>Error: {usersError}</ThemedText>
+        <TouchableOpacity onPress={refreshUsers} style={styles.retryButton}>
+          <ThemedText style={styles.retryText}>Retry</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
@@ -95,6 +155,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.headerButton}
+            onPress={createTestUsers}
+          >
+            <ThemedText style={styles.headerButtonText}>Add Test Users</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.headerButton}
             onPress={() => router.push('/new-chat')}
           >
             <ThemedText style={styles.headerButtonText}>New Chat</ThemedText>
@@ -104,22 +170,6 @@ export default function HomeScreen() {
             onPress={() => router.push('/menu')}
           >
             <ThemedText style={styles.headerButtonText}>Menu</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.headerButton}
-            onPress={async () => {
-                try {
-                    const response = await fetch('http://localhost:3000/api/users/create-test', {
-                        method: 'POST'
-                    });
-                    const data = await response.json();
-                    console.log('Test users created:', data);
-                } catch (error) {
-                    console.error('Failed to create test users:', error);
-                }
-            }}
-          >
-            <ThemedText style={styles.headerButtonText}>Create Test Users</ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </ThemedView>
@@ -142,6 +192,17 @@ export default function HomeScreen() {
         ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
         refreshing={loading}
         onRefresh={refreshConversations}
+      />
+
+      <ThemedView style={styles.separator} />
+
+      <FlatList
+        data={filteredUsers}
+        renderItem={renderUserItem}
+        keyExtractor={item => item.id}
+        ItemSeparatorComponent={() => <ThemedView style={styles.separator} />}
+        refreshing={usersLoading}
+        onRefresh={refreshUsers}
       />
     </ThemedView>
   );
@@ -231,6 +292,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  onlineBadge: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#25D366',
   },
   separator: {
     height: 1,

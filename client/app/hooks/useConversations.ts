@@ -4,7 +4,7 @@ import { Conversation } from '../types/conversation';
 
 const API_URL = 'http://localhost:3000/api'; // Update with your server URL
 
-export const useConversations = (userId: string) => {
+const useConversations = (userId: string) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +12,12 @@ export const useConversations = (userId: string) => {
   const fetchConversations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/conversations/${userId}`);
+      const response = await fetch(`${API_URL}/conversations/${userId}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch conversations');
       const data = await response.json();
       setConversations(data);
@@ -54,4 +59,6 @@ export const useConversations = (userId: string) => {
     refreshConversations: fetchConversations,
     createConversation,
   };
-}; 
+};
+
+export default useConversations; 

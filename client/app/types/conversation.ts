@@ -17,4 +17,6 @@ export interface Conversation {
     type: 'private' | 'group';
     name?: string;
     groupImage?: string;
-} 
+}
+
+export default Conversation; 

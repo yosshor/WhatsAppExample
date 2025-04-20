@@ -29,7 +29,7 @@ const storage = getStorage(app);
   connectStorageEmulator(storage, 'localhost', 9199);
   
   console.log('Connected to Firebase emulators');
-  console.log('Firestore emulator running on port 8081');
+  console.log('Firestore emulator running on port 8082');
 }
 
 // Export the services for use in other files

@@ -34,15 +34,42 @@ class UserService {
         );
     }
 
+    //get all users
+    async getAllUsers(): Promise<User[]> {
+        const querySnapshot = await getDocs(this.usersRef);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as User));
+    }
+
+    
+
     async searchUsers(searchQuery: string): Promise<User[]> {
-        const q = query(
-            this.usersRef,
-            where('name', '>=', searchQuery),
-            where('name', '<=', searchQuery + '\uf8ff')
-        );
-        
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => doc.data() as User);
+        try {
+            let q;
+            if (!searchQuery.trim()) {
+                // If no search query, return all users
+                q = query(this.usersRef);
+                console.log('q',q);
+            } else {
+                // If there's a search query, filter by name
+                q = query(
+                    this.usersRef,
+                    where('name', '>=', searchQuery),
+                    where('name', '<=', searchQuery + '\uf8ff')
+                );
+            }
+            
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as User));
+        } catch (error) {
+            console.error('Error searching users:', error);
+            throw error;
+        }
     }
 
     subscribeToUser(userId: string, callback: (user: User) => void) {

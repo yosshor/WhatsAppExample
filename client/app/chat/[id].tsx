@@ -60,6 +60,8 @@ export default function ChatScreen() {
                     }),
                     fetch(urlMessages)
                 ]);
+                console.log('convResponse',convResponse);
+                console.log('messagesResponse',messagesResponse);
 
                 if (!convResponse.ok || !messagesResponse.ok) {
                     throw new Error('Failed to load chat data');

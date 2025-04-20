@@ -7,4 +7,6 @@ export interface User {
     lastSeen?: Date;
     bio?: string;
     phoneNumber?: string;
-} 
+}
+
+export default User; 
