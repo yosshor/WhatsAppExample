@@ -7,7 +7,7 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 // import conversationRouter from "./routes/conversation/conversationRouter";
 import messageRouter from "./routes/messages/messageRouter";
-import { db } from "./config/firebase";
+import { auth, db } from "./config/firebase";
 // import userRouter from "./routes/users/usersRouters";
 // import usersRouter from "./routes/users/usersRouters";
 // import flightsRouter from './routes/flights/flightsRouter';
@@ -32,6 +32,7 @@ const io = new Server(httpServer, {
       "http://localhost:8081",
       "http://192.168.33.14",
       "http://172.20.60.65:8081",
+      'http://localhost:3000'
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -52,6 +53,7 @@ app.use(
       "http://localhost:8081",
       "http://192.168.33.14",
       "http://172.20.60.65:8081",
+      'http://localhost:3000'
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -107,6 +109,10 @@ if (db) {
 // Routes
 app.use("/api", userRoutes);
 app.use("/api", conversationRoutes);
+app.get("/api/auth/user", (req, res) => {
+  const authUser = auth;
+  res.json({ auth: authUser });
+});
 
 // app.use("/api", apiRouter);
 

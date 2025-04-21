@@ -7,11 +7,13 @@ import { useState, useEffect } from 'react';
 import { User } from '@/models/user/user';
 import Message from '@/models/message/message';
 import { Conversation } from '@/models/conversation/conversation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useApi } from '@/hooks/useApi';
 
 const API_URL = 'http://localhost:3000/api';
 
 export default function ChatScreen() {
-    const { id } = useLocalSearchParams();
+    const { id, name } = useLocalSearchParams();
     const router = useRouter();
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
@@ -19,154 +21,135 @@ export default function ChatScreen() {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [otherUser, setOtherUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    // const { fetchWithAuth } = useApi();
+    // const { user, signIn, logout } = useAuth( );
+
 
     // Function to fetch messages
-    const fetchMessages = async () => {
+    const fetchAllMessages = async () => {
         try {
-            const url = `${API_URL}/messages/${id}`;
-            console.log('url',url);
+            const url = `${API_URL}/chats/${id}/getAllMessages/`;
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch messages');
             const data = await response.json();
-            setMessages(data);
+            setMessages(data.messages);
+            return data;
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
     };
 
     useEffect(() => {
-        const loadChatData = async () => {
+        let interval: NodeJS.Timeout;
+
+        async function loadMessages() {
             try {
-                // Load conversation details
-                const url = `${API_URL}/conversations/${id}`;
-                const urlMessages = `${API_URL}/messages/${id}`;
-                console.log('url',url);
-                console.log('urlMessages',urlMessages);
-                const [convResponse, messagesResponse] = await Promise.all([
-                    fetch(url,{
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            id: id,
-                            currentUserId: currentUser?.id,
-                            otherUserId: otherUser?.id,
-                            conversationId: id,
-                            messages: messages,
-                            conversation: conversation
-                        })
-                    }),
-                    fetch(urlMessages)
-                ]);
-                console.log('convResponse',convResponse);
-                console.log('messagesResponse',messagesResponse);
-
-                if (!convResponse.ok || !messagesResponse.ok) {
-                    throw new Error('Failed to load chat data');
-                }
-
-                const [convData, messagesData] = await Promise.all([
-                    convResponse.json(),
-                    messagesResponse.json()
-                ]);
-
-                setConversation(convData);
-                setMessages(messagesData);
-
-                // Load users
-                const urlUsers = `${API_URL}/users/${convData.currentUserId}`;
-                const urlUsers2 = `${API_URL}/users/${convData.otherUserId}`;
-                console.log('urlUsers',urlUsers);
-                console.log('urlUsers2',urlUsers2);
-                const [currentUserResponse, otherUserResponse] = await Promise.all([
-                    fetch(urlUsers),
-                    fetch(urlUsers2)
-                ]);
-
-                if (!currentUserResponse.ok || !otherUserResponse.ok) {
-                    throw new Error('Failed to load users');
-                }
-
-                const [currentUserData, otherUserData] = await Promise.all([
-                    currentUserResponse.json(),
-                    otherUserResponse.json()
-                ]);
-
-                setCurrentUser(currentUserData);
-                setOtherUser(otherUserData);
-
-                // Set up polling for new messages
-                const pollInterval = setInterval(fetchMessages, 3000);
-
-                return () => clearInterval(pollInterval);
+                setIsLoading(true);
+                await fetchAllMessages(); // Initial fetch
+                
+                // Set up interval for subsequent fetches
+                interval = setInterval(() => {
+                    fetchAllMessages();
+                }, 2000);
+                
             } catch (error) {
-                console.error('Failed to load chat data:', error);
+                console.error('Failed to load messages:', error);
             } finally {
                 setIsLoading(false);
             }
-        };
+        }
 
-        loadChatData();
+        loadMessages();
+
+        // Cleanup function that will be called when component unmounts
+        return () => {
+            if (interval) {
+                clearInterval(interval);
+                console.log('Interval cleared'); // For debugging
+            }
+        };
     }, [id]);
 
     const handleSend = async () => {
-        if (!message.trim() || !currentUser || !conversation) return;
+        if (!message.trim()) {
+            console.log('Message empty or user not authenticated');
+            return;
+        }
 
         try {
-            const response = await fetch(`${API_URL}/messages`, {
+            const response = await fetch(`${API_URL}/chats/${id}/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     text: message.trim(),
-                    conversationId: id,
-                    senderId: currentUser.id,
-                    receiverId: otherUser?.id
+                    senderId: id,
+                    timestamp: new Date(),
+                    read: false,
+                    receiverId: otherUser?.id,
+                    content: {
+                        type: 'text',
+                        chatId: id,
+                        text: message.trim(),
+                    }
                 })
             });
+            const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error('Failed to send message');
+            if (data.message) {
+                setMessages(prev => [...prev, data.message]);
             }
-
-            const newMessage = await response.json();
-            setMessages(prev => [...prev, newMessage]);
             setMessage('');
-
-            // Fetch updated messages after sending
-            fetchMessages();
         } catch (error) {
             console.error('Failed to send message:', error);
         }
     };
 
-    const renderMessage = ({ item }: { item: Message }) => (
-        <ThemedView style={[
-            styles.messageContainer,
-            item.senderId === currentUser?.id ? styles.myMessage : styles.theirMessage
-        ]}>
-            {item.senderId !== currentUser?.id && item.sender?.profileImage && (
-                <Image 
-                    source={{ uri: item.sender.profileImage }} 
-                    style={styles.profileImage}
-                />
-            )}
-            <View style={styles.messageContent}>
-                <ThemedText style={styles.messageText}>{item.text}</ThemedText>
-                <ThemedText style={styles.timestamp}>
-                    {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </ThemedText>
-                {item.senderId === currentUser?.id && (
-                    <ThemedText style={styles.sign}>
-                        {item.read ? '✓✓' : '✓'}
-                    </ThemedText>
+    const renderMessage = ({ item }: { item: Message }) => {
+        const isMyMessage = item.senderId === currentUser?.id;
+        // const messageTime = item.createdAt instanceof Date 
+        //     ? item.createdAt.seconds.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        //     : item.createdAt.seconds.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        return (
+            <ThemedView style={[
+                styles.messageRow,
+                isMyMessage ? styles.myMessageRow : styles.theirMessageRow
+            ]}>
+                {!isMyMessage && (
+                    <Image
+                    source={{ uri: 'https://media.licdn.com/dms/image/v2/C4D03AQEH5EGs0OkeTw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1544222558401?e=2147483647&v=beta&t=kz_VI8EGXDQrzggcH0dtFny5u_6O_CxoaGbxA46NoRg' }}
+                        style={styles.avatar}
+                    />
                 )}
-            </View>
-        </ThemedView>
-    );
+                <View style={[
+                    styles.messageContainer,
+                    isMyMessage ? styles.myMessage : styles.theirMessage
+                ]}>
+                    {!isMyMessage && (
+                        <ThemedText style={styles.senderName}>
+                            {item.senderId}
+                        </ThemedText>
+                    )}
+                    <ThemedText style={styles.messageText}>
+                        {item.content.text}
+                    </ThemedText>
+                    <View style={styles.messageFooter}>
+                        <ThemedText style={styles.timestamp}>
+                            {item.createdAt.seconds.toLocaleString()}
+                        </ThemedText>
+                        {isMyMessage && (
+                            <ThemedText style={styles.readStatus}>
+                                {Object.keys(item.readBy || {}).length > 1 ? '✓✓' : '✓'}
+                            </ThemedText>
+                        )}
+                    </View>
+                </View>
+            </ThemedView>
+        );
+    }
 
     if (isLoading) {
         return (
@@ -179,19 +162,16 @@ export default function ChatScreen() {
     return (
         <ThemedView style={styles.container}>
             <View style={styles.header}>
-                {otherUser?.profileImage && (
-                    <Image 
-                        source={{ uri: otherUser.profileImage }} 
-                        style={styles.headerProfileImage}
-                    />
-                )}
+                <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
+                    <ThemedText>←</ThemedText>
+                </TouchableOpacity>
+                <Image
+                    source={{ uri: 'https://media.licdn.com/dms/image/v2/C4D03AQEH5EGs0OkeTw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1544222558401?e=2147483647&v=beta&t=kz_VI8EGXDQrzggcH0dtFny5u_6O_CxoaGbxA46NoRg' }}
+                    style={styles.headerAvatar}
+                />
                 <View style={styles.headerInfo}>
-                    <ThemedText style={styles.headerTitle}>
-                        {conversation?.nickname || otherUser?.name || 'Chat'}
-                    </ThemedText>
-                    <ThemedText style={styles.headerStatus}>
-                        {otherUser?.status || 'offline'}
-                    </ThemedText>
+                    <ThemedText style={styles.headerName}>{name}</ThemedText>
+                    <ThemedText style={styles.headerStatus}>online</ThemedText>
                 </View>
             </View>
 
@@ -199,27 +179,27 @@ export default function ChatScreen() {
                 data={messages}
                 renderItem={renderMessage}
                 keyExtractor={item => item.id}
-                style={styles.messagesList}
-                inverted={false}
+                style={styles.chatList}
+                contentContainerStyle={styles.chatContent}
+                inverted
             />
 
-            <ThemedView style={styles.inputContainer}>
+            <View style={styles.inputContainer}>
                 <TextInput
                     style={styles.input}
                     value={message}
                     onChangeText={setMessage}
                     placeholder="Type a message..."
-                    onSubmitEditing={handleSend}
                     multiline
                 />
-                <TouchableOpacity
+                <TouchableOpacity 
                     style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
                     onPress={handleSend}
                     disabled={!message.trim()}
                 >
                     <ThemedText style={styles.sendButtonText}>Send</ThemedText>
                 </TouchableOpacity>
-            </ThemedView>
+            </View>
         </ThemedView>
     );
 }
@@ -227,106 +207,136 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#E5DDD5',
+        
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#075E54',
+        height: 60,
+    },
+    backButton: {
+        padding: 10,
+    },
+    headerAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10,
+    },
+    headerInfo: {
+        flex: 1,
+    },
+    headerName: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    headerStatus: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        opacity: 0.8,
+    },
+    chatList: {
+        flex: 1,
+    },
+    chatContent: {
+        padding: 10,
+    },
+    messageRow: {
+        flexDirection: 'row',
+        marginVertical: 5,
+        paddingHorizontal: 10,
+        backgroundColor: '#ffffff',
+    },
+    myMessageRow: {
+        justifyContent: 'flex-end',
+    },
+    theirMessageRow: {
+        justifyContent: 'flex-start',
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 8,
+        alignSelf: 'center',
+        justifyContent: 'center',
+    },
+    messageContainer: {
+        maxWidth: '70%',
+        borderRadius: 15,
+        padding: 10,
+        paddingBottom: 15,
+    },
+    myMessage: {
+        backgroundColor: '#DCF8C6',
+        marginLeft: 40,
+    },
+    theirMessage: {
+        backgroundColor: '#FFFFFF',
+        marginRight: 40,
+    },
+    senderName: {
+        fontSize: 13,
+        color: '#075E54',
+        marginBottom: 2,
+    },
+    messageText: {
+        fontSize: 16,
+        color: '#000000',
+    },
+    messageFooter: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        position: 'absolute',
+        right: 8,
+        bottom: 4,
+    },
+    timestamp: {
+        fontSize: 11,
+        color: '#7C8B95',
+        marginRight: 3,
+    },
+    readStatus: {
+        fontSize: 11,
+        color: '#7C8B95',
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        padding: 10,
+        backgroundColor: '#F6F6F6',
+        alignItems: 'flex-end',
+    },
+    input: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        marginRight: 10,
+        maxHeight: 100,
+        minHeight: 40,
+    },
+    sendButton: {
+        backgroundColor: '#075E54',
+        borderRadius: 20,
+        paddingHorizontal: 20,
+        paddingVertical: 8,
+        justifyContent: 'center',
+    },
+    sendButtonDisabled: {
+        backgroundColor: '#B1B1B1',
+    },
+    sendButtonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
-    },
-    headerProfileImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 12,
-    },
-    headerInfo: {
-        flex: 1,
-    },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    headerStatus: {
-        fontSize: 12,
-        color: '#666',
-    },
-    messagesList: {
-        flex: 1,
-        padding: 16,
-    },
-    messageContainer: {
-        flexDirection: 'row',
-        padding: 12,
-        borderRadius: 16,
-        marginBottom: 8,
-        maxWidth: '80%',
-    },
-    myMessage: {
-        backgroundColor: '#DCF8C6',
-        alignSelf: 'flex-end',
-    },
-    theirMessage: {
-        backgroundColor: '#E8E8E8',
-        alignSelf: 'flex-start',
-    },
-    profileImage: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        marginRight: 8,
-    },
-    messageContent: {
-        flex: 1,
-    },
-    messageText: {
-        fontSize: 16,
-    },
-    timestamp: {
-        fontSize: 10,
-        color: '#8696A0',
-        marginTop: 4,
-        alignSelf: 'flex-end',
-    },
-    sign: {
-        fontSize: 12,
-        color: '#8696A0',
-        marginTop: 2,
-        alignSelf: 'flex-end',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        padding: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-    },
-    input: {
-        flex: 1,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        marginRight: 8,
-        maxHeight: 100,
-    },
-    sendButton: {
-        backgroundColor: '#128C7E',
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        justifyContent: 'center',
-    },
-    sendButtonDisabled: {
-        backgroundColor: '#cccccc',
-    },
-    sendButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
     },
 });

@@ -8,12 +8,14 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { id } = useLocalSearchParams();
 
   return (
+    <AuthProvider>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'dark'].tint,
@@ -50,6 +52,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </AuthProvider>
 
   );
 }

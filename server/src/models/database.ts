@@ -19,7 +19,6 @@ export interface Chat {
     type: 'individual' | 'group';
     name?: string;
     participants: string[];
-    admins?: string[];
     createdAt: Timestamp;
     updatedAt: Timestamp;
     lastMessage?: {

@@ -1,16 +1,27 @@
+import { Timestamp } from "firebase/firestore";
 import { User } from "../user/user";
+
+export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'file' | 'location' | 'contact' | 'system';
+
+export interface MessageContent {
+    text: string;
+    metadata?: Record<string, any>;
+}
 
 export default interface Message {
     id: string;
-    text: string;
+    chatId: string;
     senderId: string;
-    receiverId: string;
-    conversationId: string;
-    timestamp: Date;
-    read: boolean;
-    sender?: {
-        id: string;
-        name: string;
-        profileImage?: string;
+    type: string;
+    content: {
+      receiverId: string;
+      text: string;
+      metadata: object;
+      chatId: string;
     };
+    replyTo: string;
+    readBy: Record<string, any>;
+    isForwarded: boolean;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
 }

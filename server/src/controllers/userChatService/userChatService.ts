@@ -84,7 +84,7 @@ class UserService {
         console.log('Starting addTestUsers method');
         const testUsers: User[] = [
             {
-                id: 'family1',
+                id: '1234567890',
                 name: 'Family Group',
                 email: 'family@test.com',
                 profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
@@ -93,7 +93,7 @@ class UserService {
                 phoneNumber: '+1234567890'
             },
             {
-                id: 'work1',
+                id: '1234567891',
                 name: 'Work Team',
                 email: 'work@test.com',
                 profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
@@ -102,7 +102,7 @@ class UserService {
                 phoneNumber: '+1234567891'
             },
             {
-                id: 'mom1',
+                id: '1234567892',
                 name: 'Mom',
                 email: 'mom@test.com',
                 profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',
@@ -111,7 +111,7 @@ class UserService {
                 phoneNumber: '+1234567892'
             },
             {
-                id: 'dad1',
+                id: '1234567893',
                 name: 'Dad',
                 email: 'dad@test.com',
                 profileImage: 'https://as1.ftcdn.net/v2/jpg/02/43/12/34/1000_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg',

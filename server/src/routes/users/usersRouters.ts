@@ -6,7 +6,7 @@ router
   .get("/users/search", async (req, res) => {
     try {
       const query = req.query.q as string;
-      console.log("query", req.query);
+      // console.log("query", req.query);
       if (!query) {
         return res.json([]);
       }
@@ -31,9 +31,9 @@ router
   )
   .post("/users/create-test", async (req, res) => {
     try {
-      console.log("Starting to create test users...");
+      // console.log("Starting to create test users...");
       const users = await userChatService.addTestUsers();
-      console.log("Successfully created users:", users);
+      // console.log("Successfully created users:", users);
       res.json({ message: "Test users created successfully", users });
     } catch (error) {
       console.error("Error creating test users:", error);
