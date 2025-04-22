@@ -1,51 +1,52 @@
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { addDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
+import { ChatController } from "../chat/chatController";
+
+
+const chatController = new ChatController();
 
 // Send a new message
 export const sendMessage = async (req: any, res: any) => {
-    try {
-        const { text, senderId, receiverId, conversationId } = req.body;
-        console.log("text", text);
-        console.log("senderId", senderId);
-        console.log("receiverId", receiverId);
-        console.log("conversationId", conversationId);
-        const messagesRef = collection(db, 'messages');
-        
-        const newMessage = {
-            text,
-            senderId,
-            receiverId,
-            conversationId,
-            timestamp: new Date()
-        };
-        
-        const docRef = await addDoc(messagesRef, newMessage);
-        res.json({ id: docRef.id, ...newMessage });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to send message' });
-    }
+  try {
+    const { chatId } = req.params;
+    const { type, content, replyTo, senderId, receiverId } = req.body;
+    console.log("req. params", type, content, replyTo, senderId, receiverId);
+    const messageId = await chatController.sendMessage(
+      chatId,
+      senderId,
+      type || "text",
+      content,
+      senderId
+    );
+    res.status(201).json({ messageId });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
 };
 
 // Get messages for a conversation
-export const getMessages = async (req: any, res: any) => {
-    try {
-        const { conversationId } = req.params;
-        const messagesRef = collection(db, 'messages');
-        const q = query(
-            messagesRef,
-            where('conversationId', '==', conversationId),
-            orderBy('timestamp', 'asc')
-        );
-        
-        const snapshot = await getDocs(q);
-        const messages = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-        
-        res.json(messages);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch messages' });
-    }
+export const getAllMessages = async (req: any, res: any) => {
+  try {
+    const { chatId } = req.params;
+    const { lastMessageId, pageSize } = req.query;
+    console.log("chatId", chatId);
+    const messages = await chatController.getChatMessages(chatId);
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.error("Error getting chat messages:", error);
+    res.status(500).json({ error: "Failed to get chat messages" });
+  }
+};
+
+export const readMessage = async (req: any, res: any) => {
+  try {
+    const { messageId } = req.params;
+    await chatController.markMessageAsRead(messageId, req.user.id);
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    res.status(500).json({ error: "Failed to mark message as read" });
+  }
 };

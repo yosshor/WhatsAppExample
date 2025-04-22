@@ -1,9 +1,9 @@
 import { StyleSheet, TextInput, TouchableOpacity, FlatList, View, Image } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '../../components/ThemedView';
+import { ThemedText } from '../../components/ThemedText';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { styles } from './[id].ts';
+import { styles } from './[id]styles';
 import { User } from '@/models/user/user';
 import Message from '@/models/message/message';
 import { Conversation } from '@/models/conversation/conversation';

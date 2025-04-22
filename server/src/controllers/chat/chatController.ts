@@ -216,39 +216,6 @@ export class ChatController {
     }
   }
 
-  // async getChatMessages(
-  //   chatId: string,
-  //   lastMessageId?: string,
-  //   pageSize: number = 50
-  // ): Promise<Message[]> {
-  //   try {
-  //     let messagesQuery = query(
-  //       this.chatsRef,
-  //       where("id", "==", chatId),
-  //       orderBy("createdAt", "desc"),
-  //       limit(pageSize)
-  //     );
-  //     console.log('messagesQuery', messagesQuery);
-  //     if (lastMessageId) {
-  //       const lastMessageDoc = await getDoc(
-  //         doc(this.messagesRef(chatId), lastMessageId)
-  //       );
-  //       if (lastMessageDoc.exists()) {
-  //         messagesQuery = query(messagesQuery, startAfter(lastMessageDoc));
-  //       }
-  //     }
-
-  //     const messageDocs = await getDocs(messagesQuery);
-  //     return messageDocs.docs.map((doc) => ({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //     })) as Message[];
-  //   } catch (error) {
-  //     console.error("Error getting chat messages:", error);
-  //     throw error;
-  //   }
-  // }
-
   async getUserChats(userId: string): Promise<Chat[]> {
     try {
       const participantsQuery = query(
