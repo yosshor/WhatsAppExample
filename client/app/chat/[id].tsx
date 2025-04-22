@@ -219,7 +219,7 @@ export default function ChatScreen() {
         <ThemedView style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
-                    <ThemedText>←</ThemedText>
+                    <ThemedText style={styles.backButton}>←</ThemedText>
                 </TouchableOpacity>
                 <Image
                     source={{ uri: 'https://media.licdn.com/dms/image/v2/C4D03AQEH5EGs0OkeTw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1544222558401?e=2147483647&v=beta&t=kz_VI8EGXDQrzggcH0dtFny5u_6O_CxoaGbxA46NoRg' }}

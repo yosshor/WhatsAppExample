@@ -13,7 +13,12 @@ export const styles = StyleSheet.create({
         height: 60,
     },
     backButton: {
-        padding: 10,
+        flexDirection: 'row',
+        paddingRight: 16,
+        alignItems: 'center',
+        color:'white',
+        fontSize:30,
+        fontWeight:'bold'
     },
     headerAvatar: {
         width: 40,
