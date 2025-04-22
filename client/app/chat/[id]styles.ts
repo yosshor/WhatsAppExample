@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
         marginVertical: 5,
         alignItems: 'flex-end',
         maxWidth: '80%',
-        
+        minWidth: '50%',
     },
     myMessageRow: {
         alignSelf: 'flex-end',
@@ -64,16 +64,12 @@ export const styles = StyleSheet.create({
         height: 35,
         borderRadius: 17.5,
         marginRight: 8,
-        alignSelf: 'flex-end',
+        alignSelf: 'flex-start',
         marginBottom: 4,
-        alignItems:'center',
-        justifyContent:'center'
     },
     messageContainer: {
         flex: 1,
         borderRadius: 15,
-        padding: 8,
-        paddingBottom: 18,
         maxWidth: '100%',
     },
     myMessage: {
@@ -91,7 +87,10 @@ export const styles = StyleSheet.create({
     messageText: {
         fontSize: 15,
         color: '#000000',
-        marginRight: 45, // Make space for timestamp
+        marginRight: '20%', // Make space for timestamp
+        alignItems:'center',
+        justifyContent:'center',
+        width:'auto'
     },
     messageFooter: {
         flexDirection: 'row',

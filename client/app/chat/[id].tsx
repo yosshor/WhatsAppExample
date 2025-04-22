@@ -37,7 +37,6 @@ export default function ChatScreen() {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch messages');
             const data = await response.json();
-            console.log('data', data.messages[0]);
             const sortedMessages = data.messages.sort((a: Message, b: Message) => 
                 new Date(b.createdAt.seconds * 1000).getTime() - new Date(a.createdAt.seconds * 1000).getTime()
             );
@@ -187,7 +186,7 @@ export default function ChatScreen() {
                 ]}>
                     {!isMyMessage && (
                         <ThemedText style={styles.senderName}>
-                            {item.senderId}
+                            {name}
                         </ThemedText>
                     )}
                     <ThemedText style={styles.messageText}>
