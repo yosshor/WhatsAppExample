@@ -3,12 +3,13 @@ import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-// import socketService from '../../controllers/socketService';
+import { styles } from './[id].ts';
 import { User } from '@/models/user/user';
 import Message from '@/models/message/message';
 import { Conversation } from '@/models/conversation/conversation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks/useApi';
+import React from 'react';
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -18,7 +19,11 @@ export default function ChatScreen() {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [conversation, setConversation] = useState<Conversation | null>(null);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>({
+        id: typeof id === 'string' ? id+'2' : Array.isArray(id) ? id[0] : '',
+        name: '',
+        email: ''
+    });
     const [otherUser, setOtherUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     // const { fetchWithAuth } = useApi();
@@ -32,15 +37,18 @@ export default function ChatScreen() {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch messages');
             const data = await response.json();
-            setMessages(data.messages);
+            console.log('data', data.messages[0]);
+            const sortedMessages = data.messages.sort((a: Message, b: Message) => 
+                new Date(b.createdAt.seconds * 1000).getTime() - new Date(a.createdAt.seconds * 1000).getTime()
+            );
+            setMessages(sortedMessages);
             return data;
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
     };
-
     useEffect(() => {
-        let interval: NodeJS.Timeout;
+        let interval: ReturnType<typeof setInterval>;
 
         async function loadMessages() {
             try {
@@ -109,9 +117,58 @@ export default function ChatScreen() {
 
     const renderMessage = ({ item }: { item: Message }) => {
         const isMyMessage = item.senderId === currentUser?.id;
-        // const messageTime = item.createdAt instanceof Date 
-        //     ? item.createdAt.seconds.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        //     : item.createdAt.seconds.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Format timestamp into readable date and time
+        let messageDateTime = '';
+        try {
+            if (item.createdAt) {
+                if (typeof item.createdAt === 'object' && 'seconds' in item.createdAt) {
+                    // Handle Firestore Timestamp
+                    const date = new Date(item.createdAt.seconds * 1000);
+                    
+                    // Check if message is from today
+                    const today = new Date();
+                    const isToday = date.toDateString() === today.toDateString();
+                    
+                    if (isToday) {
+                        // If message is from today, only show time
+                        messageDateTime = date.toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit'
+                        });
+                    } else {
+                        // If message is from another day, show date and time
+                        messageDateTime = date.toLocaleString([], {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                } else if (typeof item.createdAt === 'object') {
+                    // Handle Date object
+                    const date = new Date(item.createdAt as any);
+                    messageDateTime = date.toLocaleString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } else {
+                    // Handle string timestamp
+                    const date = new Date(item.createdAt as string);
+                    messageDateTime = date.toLocaleString([], {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error formatting message time:', error);
+            messageDateTime = '';
+        }
 
         return (
             <ThemedView style={[
@@ -120,7 +177,7 @@ export default function ChatScreen() {
             ]}>
                 {!isMyMessage && (
                     <Image
-                    source={{ uri: 'https://media.licdn.com/dms/image/v2/C4D03AQEH5EGs0OkeTw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1544222558401?e=2147483647&v=beta&t=kz_VI8EGXDQrzggcH0dtFny5u_6O_CxoaGbxA46NoRg' }}
+                        source={{ uri: 'https://media.licdn.com/dms/image/v2/C4D03AQEH5EGs0OkeTw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1544222558401?e=2147483647&v=beta&t=kz_VI8EGXDQrzggcH0dtFny5u_6O_CxoaGbxA46NoRg' }}
                         style={styles.avatar}
                     />
                 )}
@@ -138,7 +195,7 @@ export default function ChatScreen() {
                     </ThemedText>
                     <View style={styles.messageFooter}>
                         <ThemedText style={styles.timestamp}>
-                            {item.createdAt.seconds.toLocaleString()}
+                            {messageDateTime}
                         </ThemedText>
                         {isMyMessage && (
                             <ThemedText style={styles.readStatus}>
@@ -149,7 +206,7 @@ export default function ChatScreen() {
                 </View>
             </ThemedView>
         );
-    }
+    };
 
     if (isLoading) {
         return (
@@ -204,139 +261,3 @@ export default function ChatScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#E5DDD5',
-        
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        backgroundColor: '#075E54',
-        height: 60,
-    },
-    backButton: {
-        padding: 10,
-    },
-    headerAvatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 10,
-    },
-    headerInfo: {
-        flex: 1,
-    },
-    headerName: {
-        color: '#FFFFFF',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    headerStatus: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        opacity: 0.8,
-    },
-    chatList: {
-        flex: 1,
-    },
-    chatContent: {
-        padding: 10,
-    },
-    messageRow: {
-        flexDirection: 'row',
-        marginVertical: 5,
-        paddingHorizontal: 10,
-        backgroundColor: '#ffffff',
-    },
-    myMessageRow: {
-        justifyContent: 'flex-end',
-    },
-    theirMessageRow: {
-        justifyContent: 'flex-start',
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        marginRight: 8,
-        alignSelf: 'center',
-        justifyContent: 'center',
-    },
-    messageContainer: {
-        maxWidth: '70%',
-        borderRadius: 15,
-        padding: 10,
-        paddingBottom: 15,
-    },
-    myMessage: {
-        backgroundColor: '#DCF8C6',
-        marginLeft: 40,
-    },
-    theirMessage: {
-        backgroundColor: '#FFFFFF',
-        marginRight: 40,
-    },
-    senderName: {
-        fontSize: 13,
-        color: '#075E54',
-        marginBottom: 2,
-    },
-    messageText: {
-        fontSize: 16,
-        color: '#000000',
-    },
-    messageFooter: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        position: 'absolute',
-        right: 8,
-        bottom: 4,
-    },
-    timestamp: {
-        fontSize: 11,
-        color: '#7C8B95',
-        marginRight: 3,
-    },
-    readStatus: {
-        fontSize: 11,
-        color: '#7C8B95',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        padding: 10,
-        backgroundColor: '#F6F6F6',
-        alignItems: 'flex-end',
-    },
-    input: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        paddingHorizontal: 15,
-        paddingVertical: 8,
-        marginRight: 10,
-        maxHeight: 100,
-        minHeight: 40,
-    },
-    sendButton: {
-        backgroundColor: '#075E54',
-        borderRadius: 20,
-        paddingHorizontal: 20,
-        paddingVertical: 8,
-        justifyContent: 'center',
-    },
-    sendButtonDisabled: {
-        backgroundColor: '#B1B1B1',
-    },
-    sendButtonText: {
-        color: '#FFFFFF',
-        fontWeight: 'bold',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
