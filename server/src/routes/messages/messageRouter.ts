@@ -1,5 +1,4 @@
 import express from "express";
-import { ChatController } from "../../controllers/chat/chatController";
 import { authenticateUser } from "../../middleware/auth";
 import {
   getAllMessages,

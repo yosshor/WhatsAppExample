@@ -100,24 +100,15 @@ if (db) {
   );
 }
 
-// API Routes
-// const apiRouter = express.Router();
-// apiRouter.use("/conversations", conversationRouter);
-// apiRouter.use("/messages", messageRouter);
-// apiRouter.use("/users", userRouter);
 
 // Routes
 app.use("/api", userRoutes);
-app.use("/api", conversationRoutes);
+app.use("/api/conversations", conversationRoutes);
 app.get("/api/auth/user", (req, res) => {
+  app.use("/api/chats", chatRoutes);
   const authUser = auth;
   res.json({ auth: authUser });
 });
-
-// app.use("/api", apiRouter);
-
-// Routes
-app.use("/api/chats", chatRoutes);
 
 // Error handling middleware
 app.use(
@@ -132,18 +123,6 @@ app.use(
   }
 );
 
-// Error handling middleware
-app.use(
-  (
-    err: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) => {
-    console.error(err.stack);
-    res.status(500).json({ message: "Something went wrong!" });
-  }
-);
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
