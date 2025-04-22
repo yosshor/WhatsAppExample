@@ -5,14 +5,10 @@ import { config } from "dotenv";
 import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
-// import conversationRouter from "./routes/conversation/conversationRouter";
 import messageRouter from "./routes/messages/messageRouter";
 import { auth, db } from "./config/firebase";
-// import userRouter from "./routes/users/usersRouters";
-// import usersRouter from "./routes/users/usersRouters";
-// import flightsRouter from './routes/flights/flightsRouter';
-// import adminRouter from './routes/sysAdmin/adminRouter';
 import chatRoutes from "./routes/chatRoutes";
+
 // Load environment variables
 config();
 import userRoutes from "./routes/users/usersRouters";
@@ -104,6 +100,7 @@ if (db) {
 // Routes
 app.use("/api", userRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use('/api/messages', messageRouter)
 app.get("/api/auth/user", (req, res) => {
   app.use("/api/chats", chatRoutes);
   const authUser = auth;

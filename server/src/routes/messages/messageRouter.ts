@@ -5,6 +5,7 @@ import {
   readMessage,
   sendMessage,
 } from "../../controllers/messages/messages";
+import { createNewChat } from "../../controllers/chat/chatController";
 
 const router = express.Router();
 
@@ -12,9 +13,12 @@ const router = express.Router();
 router.post("/:chatId/sendMessage", sendMessage);
 
 // Mark message as read
-router.put("/messages/:messageId/read", authenticateUser, readMessage);
+router.put("/:messageId/read", authenticateUser, readMessage);
 
 // Get all chat messages
 router.get("/:chatId/getAllMessages", getAllMessages);
+
+// Create a new chat
+router.post("/createNewChat", authenticateUser, createNewChat);
 
 export default router;

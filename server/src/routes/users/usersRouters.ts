@@ -1,6 +1,13 @@
 import express from "express";
 import userChatService from "../../controllers/userChatService/userChatService";
+import { authenticateUser } from "../../middleware/auth";
+import { getUserChats } from "../../controllers/users/usersController";
 const router = express.Router();
+
+
+
+// Get user's chats
+router.get("/user/:userId", authenticateUser, getUserChats)
 
 router
   .get("/users/search", async (req, res) => {

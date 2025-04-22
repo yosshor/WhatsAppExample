@@ -33,7 +33,7 @@ export default function ChatScreen() {
     // Function to fetch messages
     const fetchAllMessages = async () => {
         try {
-            const url = `${API_URL}/chats/${id}/getAllMessages/`;
+            const url = `${API_URL}/messages/${id}/getAllMessages/`;
             const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to fetch messages');
             const data = await response.json();
@@ -85,7 +85,7 @@ export default function ChatScreen() {
         }
 
         try {
-            const response = await fetch(`${API_URL}/chats/${id}/sendMessage`, {
+            const response = await fetch(`${API_URL}/messages/${id}/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

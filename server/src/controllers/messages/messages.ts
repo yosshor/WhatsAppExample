@@ -1,8 +1,7 @@
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { addDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
-import { ChatController } from "../chat/chatController";
-
+import { ChatController } from "../chat/chatClass";
 
 const chatController = new ChatController();
 
@@ -50,3 +49,4 @@ export const readMessage = async (req: any, res: any) => {
     res.status(500).json({ error: "Failed to mark message as read" });
   }
 };
+

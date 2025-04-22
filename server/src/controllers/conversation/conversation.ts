@@ -7,7 +7,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "../../config/firebase";
-import conversationService from "../../controllers/conversation/conversationController";
+import conversationService from "./ConversationService";
 
 // Get conversation details
 export const getConversation = async (req: any, res: any) => {
