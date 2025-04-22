@@ -7,12 +7,12 @@ import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import messageRouter from "./routes/messages/messageRouter";
 import { auth, db } from "./config/firebase";
-import chatRoutes from "./routes/chatRoutes";
+import chatRoutes from "./routes/chats/chatsRouter";
+import userRoutes from "./routes/users/usersRouters";
+import conversationRoutes from "./routes/conversations/conversationRoutes";
 
 // Load environment variables
 config();
-import userRoutes from "./routes/users/usersRouters";
-import conversationRoutes from "./routes/conversations/conversationRoutes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -101,8 +101,8 @@ if (db) {
 app.use("/api", userRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use('/api/messages', messageRouter)
+app.use("/api/chats", chatRoutes);
 app.get("/api/auth/user", (req, res) => {
-  app.use("/api/chats", chatRoutes);
   const authUser = auth;
   res.json({ auth: authUser });
 });

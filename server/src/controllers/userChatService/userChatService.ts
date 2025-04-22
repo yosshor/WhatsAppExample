@@ -1,6 +1,6 @@
 import { db } from '../../config/firebase';
 import { collection, doc, getDoc, setDoc, updateDoc, onSnapshot, query, where, getDocs } from 'firebase/firestore';
-import { User, UserChat } from '../../model/user/user';
+import { User, UserChat } from '../../models/user';
 
 class UserService {
     private usersRef = collection(db, 'users');

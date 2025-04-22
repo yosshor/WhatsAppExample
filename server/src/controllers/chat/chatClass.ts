@@ -208,7 +208,6 @@ export class ChatController {
       id: doc.id,
       ...doc.data(),
     }));
-    console.log('messages', messages);
     return messages;
     } catch (error) {
       console.error("Error getting chat messages:", error);

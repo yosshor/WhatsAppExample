@@ -1,6 +1,6 @@
 import { db } from '../../config/firebase';
 import { collection, doc, getDoc, setDoc, query, where, getDocs, orderBy, limit, updateDoc } from 'firebase/firestore';
-import { User } from '../../model/user/user';
+import { User } from '../../models/user';
 
 interface Message {
     id: string;
