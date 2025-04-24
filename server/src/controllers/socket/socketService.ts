@@ -2,7 +2,7 @@
 import io from 'socket.io-client';
 
 
-class SocketService {
+export class SocketService {
     socket: any;
     platform: string;
     socketUrl: string;

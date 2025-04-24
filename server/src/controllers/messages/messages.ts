@@ -2,12 +2,15 @@ import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { addDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { ChatController } from "../chat/chatClass";
-
+import { SocketService } from "../socket/socketService";
 const chatController = new ChatController();
+const socketService = new SocketService("android");
 
 // Send a new message
 export const sendMessage = async (req: any, res: any) => {
   try {
+    socketService.sendMessage(req.body.message, req.body.chatId);
+
     const { chatId } = req.params;
     const { type, content, replyTo, senderId, receiverId } = req.body;
     console.log("req. params", type, content, replyTo, senderId, receiverId);
@@ -30,6 +33,8 @@ export const getAllMessages = async (req: any, res: any) => {
   try {
     const { chatId } = req.params;
     const { lastMessageId, pageSize } = req.query;
+    socketService.joinRoom(chatId);
+
     console.log("chatId", chatId);
     const messages = await chatController.getChatMessages(chatId);
     res.status(200).json({ messages });
@@ -49,4 +54,3 @@ export const readMessage = async (req: any, res: any) => {
     res.status(500).json({ error: "Failed to mark message as read" });
   }
 };
-
